@@ -7,7 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from django.shortcuts import render
 
 
-def hello_world(request, name):
+def hello_world_name(request, name=''):
     return render(request, 'hello_world.html', {'name' : name})
 
 def calculate(request, value):
