@@ -1,9 +1,6 @@
-import math
 
+from .models import Guests
 import mpmath
-from django.shortcuts import render, get_object_or_404
-
-# Create your views here.
 from django.shortcuts import render
 
 
@@ -15,4 +12,8 @@ def calculate(request, value):
     sec = mpmath.rand()
     ans = first * sec
     return render(request, 'calculation.html', {'first': first, 'sec': sec, 'ans': ans})
+
+def guestList(request):
+    guest = Guests.objects.all()
+    return render(request, 'guest_list.html', {'guest': guest})
 

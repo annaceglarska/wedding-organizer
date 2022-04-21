@@ -1,15 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Guest list</title>
-</head>
-<body>
+ {% extends "base.html" %}
 
-<table>
-    <td>name</td>
-    <td>surname</td>
-</table>
+ {% block page_content %}
+ <table class="table table-bordered table-dark">
+     <thead>
+        <tr>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>Phone</th>
+            <th>Age</th>
+        </tr>
 
-</body>
-</html>
+        {% for one_guest in guest %}
+        <tr>
+            <td>{{ one_guest.id }}</td>
+            <td>{{ one_guest.name }}</td>
+            <td>{{ one_guest.surname }}</td>
+            <td>{{ one_guest.phone }}</td>
+            <td>{{ one_guest.age }}</td>
+        </tr>
+        {% endfor %}
+     </thead>
+ </table>
+
+ {% endblock %}

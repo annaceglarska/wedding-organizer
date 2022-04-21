@@ -1,5 +1,20 @@
 from django.db import models
-from django.utils import timezone
-from django.contrib.auth.models import User
 
-title = models.CharField(max_length=250)
+
+class Guests(models.Model):
+    class Meta:
+        db_table = 'Guests'
+
+    name = models.CharField(max_length=15)
+    surname = models.CharField(max_length=30)
+    phone = models.CharField(max_length=12)
+    age = models.IntegerField()
+
+
+class Tables(models.Model):
+    class Meta:
+        db_table = 'Tables'
+
+    number_of_seats = models.IntegerField()
+    guest_id = models.IntegerField()
+

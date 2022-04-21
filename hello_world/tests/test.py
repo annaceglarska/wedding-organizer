@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
+from mock import patch
 
 
 class HelloTests(TestCase):
@@ -7,7 +8,7 @@ class HelloTests(TestCase):
         args = ['Ania']
         #response = self.client.get(reverse('hello_world_with_name', args={'name': 'Ania'}))
         response = self.client.get(reverse('hello_world_with_name', args=args))
-        #self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         # html = response.getvalue()
         # htmlString = html.decode('utf-8')
         # print(htmlString)
@@ -19,4 +20,7 @@ class HelloTests(TestCase):
         arg = 'Ania'
         response = self.client.get(reverse('hello_world_with_name', args= [arg]))
         self.assertContains(response, arg)
+
+
+
 

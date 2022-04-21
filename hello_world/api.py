@@ -16,3 +16,5 @@ def addTwoNumbersView(request):
         result = params['first'] + params['second']
         return JsonResponse({'result': result})
     return HttpResponseBadRequest()
+
+
