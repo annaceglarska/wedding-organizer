@@ -10,6 +10,8 @@ class Guests(models.Model):
     phone = models.CharField(max_length=12)
     age = models.IntegerField()
 
+    objects = models.Manager()
+
 
 class Tables(models.Model):
     class Meta:
