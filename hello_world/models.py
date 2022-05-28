@@ -18,5 +18,20 @@ class Tables(models.Model):
         db_table = 'Tables'
 
     number_of_seats = models.IntegerField()
-    guest_id = models.IntegerField()
+
+
+class Seats(models.Model):
+    class Meta:
+        db_table = 'Seats'
+
+    seat_number =  models.IntegerField()
+    table = models.ForeignKey(Tables, on_delete=models.CASCADE)
+
+
+class Seating(models.Model):
+    class Meta:
+        db_table = 'Seating'
+
+    guest = models.ForeignKey(Guests, on_delete=models.CASCADE)
+    seat = models.ForeignKey(Seats, on_delete=models.CASCADE)
 
