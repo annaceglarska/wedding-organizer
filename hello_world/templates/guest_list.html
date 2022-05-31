@@ -11,13 +11,13 @@
             <th>Age</th>
         </tr>
 
-        {% for one_guest in guest %}
+        {% for guest in guests %}
         <tr>
-            <td>{{ one_guest.id }}</td>
-            <td>{{ one_guest.name }}</td>
-            <td>{{ one_guest.surname }}</td>
-            <td>{{ one_guest.phone }}</td>
-            <td>{{ one_guest.age }}</td>
+            <td>{{ guest.id }}</td>
+            <td>{{ guest.name }}</td>
+            <td>{{ guest.surname }}</td>
+            <td>{{ guest.phone }}</td>
+            <td>{{ guest.age }}</td>
         </tr>
         {% endfor %}
      </thead>
