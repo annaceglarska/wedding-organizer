@@ -27,7 +27,7 @@ def guest_list_endpoint(request):
 
 def one_guest_endpoint(request, guest_id):
     guest = Guests.objects.filter(id=guest_id)
-    listGuest = serialize("json", guest)
-    return HttpResponse(listGuest, content_type="application/json")
+    guestJson = serialize("json", guest)
+    return HttpResponse(guestJson, content_type="application/json")
 
 
