@@ -11,4 +11,5 @@ urlpatterns = [
     path('guests/<int:guest_id>/', views.one_guest, name='one-guest'),
     path('', views.wedding_organizer_start_name, name='wedding-organizer-start'),
     path('<slug:name>/', views.wedding_organizer_start_name, name='wedding-organizer-start-name'),
+    path('add-new-guest', views.add_new_guest, name='form-add-new-guest'),
 ]
