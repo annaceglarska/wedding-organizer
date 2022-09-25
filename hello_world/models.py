@@ -24,7 +24,7 @@ class Seats(models.Model):
     class Meta:
         db_table = 'Seats'
 
-    seat_number =  models.IntegerField()
+    seat_number = models.IntegerField()
     table = models.ForeignKey(Tables, on_delete=models.CASCADE)
 
 
