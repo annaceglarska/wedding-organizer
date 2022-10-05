@@ -1,0 +1,35 @@
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark text-white mb-2">
+    <a class="navbar-brand text-white" href="{% url 'wedding-organizer-start' %}">Home</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Guests
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'guest-list' %}">Guest list</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'form-add-new-guest' %}">Add new guest</a>
+
+                </div>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Api
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'guest-list-endpoint' %}">Guest list endpoint</a>
+
+                </div>
+        </ul>
+    </div>
+</nav>
+{% endblock %}
