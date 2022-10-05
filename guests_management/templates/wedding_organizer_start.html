@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_content %}
+<h1>Wedding Organizer</h1>
+<p class="font-italic m-2">Hello{% if name %} {{ name }}{% endif %}! We're Ania and Grzgorz and this is our wedding-organizer. We're planning our
+    wedding on June 24th in 2023. This page will help us plan our celebration.</p>
+<div>
+    <img class="main-picture" src="{% static 'assets/start_page.jpg' %}" alt="home" />
+</div>
+
+
+<!--CSS-->
+<link rel="stylesheet" href="{% static 'css/start-page.css' %}">
+{% endblock %}
