@@ -1,6 +1,6 @@
 from .models import Guests
 from django.shortcuts import render
-from .forms import AddGuest
+from .forms import AddGuest, AddTable
 
 
 def wedding_organizer_start_name(request):
@@ -48,3 +48,12 @@ def add_new_guest(request):
         # wyswietl formularz do pobierania danych
         form_guest = AddGuest()
         return render(request, 'add_guest.html', {})
+
+
+def add_new_table(request):
+    if request.method == 'POST':
+        form_table = AddTable(request.POST)
+        if form_table.is_valid():
+            number_of_seats = request.POST.get('number_of_seats')
+            table_name = request.POST.get('table_name')
+            description = request.POST.get('description')
