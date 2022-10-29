@@ -1,4 +1,4 @@
-from .models import Guests
+from .models import Guests, Tables
 from django.shortcuts import render
 from .forms import AddGuest, AddTable
 
@@ -57,3 +57,18 @@ def add_new_table(request):
             number_of_seats = request.POST.get('number_of_seats')
             table_name = request.POST.get('table_name')
             description = request.POST.get('description')
+
+            theSameTableCount = Tables.objects.filter(table_name=table_name).count()
+            if theSameTableCount != 0:
+                return render(request, "add_table.html", {'tableExist': True, 'tableName': table_name,
+                                                          'description': description,
+                                                          'numberOfSeats': number_of_seats})
+
+            form_table.save()
+            return render(request, "add_table.html", {'afterAdd': True, 'addedTableName': table_name, })
+        else:
+            errors = form_table.errors
+            return render(request, 'add_table.html', {'errorTable': True, 'errorList': errors})
+    else:
+        form_table = AddTable()
+        return render(request, 'add_table.html', {})

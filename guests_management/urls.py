@@ -11,8 +11,12 @@ urlpatterns = [
     path('guests/', views.guest_list, name='guest-list'),
     path('guests/filter/', views.one_guest_with_params, name='guest-with-params'),
     path('guests/<int:guest_id>/', views.one_guest, name='one-guest'),
-    path('guests/add-new-guest', views.add_new_guest, name='form-add-new-guest'),
+    path('guests/add-new-guest/', views.add_new_guest, name='form-add-new-guest'),
     #  end guests
+
+    # start table
+    path('table/add-new-table/', views.add_new_table, name='form-add-new-table'),
+    #end table
 
     # start api
     path('api/guests/', api.guest_list_endpoint, name='guest-list-endpoint'),

@@ -17,8 +17,18 @@
                     <a class="dropdown-item" href="{% url 'guest-list' %}">Guest list</a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{% url 'form-add-new-guest' %}">Add new guest</a>
-
                 </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                   aria-haspopup="true" aria-expanded="false">
+                    Table
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{% url 'form-add-new-table' %}">Add new table</a>
+                </div>
+            </li>
 
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
@@ -27,9 +37,13 @@
                 </a>
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="{% url 'guest-list-endpoint' %}">Guest list endpoint</a>
-
                 </div>
+            </li>
+
+
         </ul>
+
+
     </div>
 </nav>
 {% endblock %}
