@@ -3,12 +3,17 @@
 {% block page_content %}
 <div class="d-flex justify-content-center">
     <div>
+        {% if isInEditMode %}
+        <h1>Edit table</h1>
+        {% else %}
         <h1>Add new table</h1>
+        {% endif %}
         <form action="" method="POST">
             {% csrf_token %}
             <div class="form-group">
                 <label for="table_name_field">Table name</label>
-                <input type="text" class="form-control" id="table_name_field" name="table_name" placeholder="Enter table name"
+                <input type="text" class="form-control" id="table_name_field" name="table_name"
+                       placeholder="Enter table name"
                        value="{{ tableName }}" required>
             </div>
 
@@ -24,7 +29,12 @@
                        placeholder="Enter number of seats" value="{{ numberOfSeats }}" required>
             </div>
 
-            <button type="submit" class="btn btn-secondary">Add</button>
+            {% if isInEditMode %}
+                <button type="submit" class="btn btn-secondary">Edit</button>
+            {% else %}
+                <button type="submit" class="btn btn-secondary">Add</button>
+            {% endif %}
+
 
             {% if afterAdd %}
             <p class="confirmation_container container">

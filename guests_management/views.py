@@ -13,9 +13,19 @@ def guest_list(request):
     return render(request, 'guest_list.html', {'guests': guests})
 
 
+def table_list(request):
+    tables = Tables.objects.all()
+    return render(request, 'table_list.html', {'tables': tables})
+
+
 def one_guest(request, guest_id):
     guests = Guests.objects.filter(id=guest_id)
     return render(request, 'guest_list.html', {'guests': guests})
+
+
+def one_table(request, table_id):
+    tables = Tables.objects.filter(id=table_id)
+    return render(request, 'table_list.html', {'tables': tables})
 
 
 def one_guest_with_params(request):
@@ -50,25 +60,61 @@ def add_new_guest(request):
         return render(request, 'add_guest.html', {})
 
 
-def add_new_table(request):
+def core_new_table(request, table_id):
+    isInEditMode = bool(table_id)
+
     if request.method == 'POST':
-        form_table = AddTable(request.POST)
+        number_of_seats = request.POST.get('number_of_seats')
+        table_name = request.POST.get('table_name')
+        description = request.POST.get('description')
+
+        if isInEditMode:
+            table_to_edit = Tables.objects.get(id=table_id)
+            form_table = AddTable(request.POST, instance=table_to_edit)
+        else:
+            form_table = AddTable(request.POST)
+
         if form_table.is_valid():
-            number_of_seats = request.POST.get('number_of_seats')
-            table_name = request.POST.get('table_name')
-            description = request.POST.get('description')
 
             theSameTableCount = Tables.objects.filter(table_name=table_name).count()
             if theSameTableCount != 0:
                 return render(request, "add_table.html", {'tableExist': True, 'tableName': table_name,
                                                           'description': description,
-                                                          'numberOfSeats': number_of_seats})
+                                                          'numberOfSeats': number_of_seats,
+                                                          'isInEditMode': isInEditMode})
 
             form_table.save()
-            return render(request, "add_table.html", {'afterAdd': True, 'addedTableName': table_name, })
+            return render(request, "add_table.html",
+                          {'afterAdd': True, 'addedTableName': table_name, 'isInEditMode': isInEditMode})
         else:
             errors = form_table.errors
-            return render(request, 'add_table.html', {'errorTable': True, 'errorList': errors})
+            return render(request, 'add_table.html',
+                          {'errorTable': True, 'errorList': errors, 'tableName': table_name,
+                                                          'description': description,
+                                                          'numberOfSeats': number_of_seats,
+                                                          'isInEditMode': isInEditMode})
     else:
-        form_table = AddTable()
-        return render(request, 'add_table.html', {})
+        if isInEditMode:
+            table_to_edit = Tables.objects.get(id=table_id)
+            return render(request, 'add_table.html', {'tableName': table_to_edit.table_name,
+                                                      'description': table_to_edit.description,
+                                                      'numberOfSeats': table_to_edit.number_of_seats,
+                                                      'isInEditMode': isInEditMode})
+        else:
+            return render(request, 'add_table.html', {'isInEditMode': isInEditMode})
+
+
+def add_new_table(request):
+    return core_new_table(request, False)
+
+
+def edit_new_table(request, table_id):
+    return core_new_table(request, table_id)
+
+
+
+
+
+
+
+
