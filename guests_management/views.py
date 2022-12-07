@@ -70,22 +70,27 @@ def core_new_table(request, table_id):
 
         if isInEditMode:
             table_to_edit = Tables.objects.get(id=table_id)
+            table_real_name = table_to_edit.table_name
             form_table = AddTable(request.POST, instance=table_to_edit)
         else:
             form_table = AddTable(request.POST)
+            table_real_name = ''
 
         if form_table.is_valid():
 
             theSameTableCount = Tables.objects.filter(table_name=table_name).count()
-            if theSameTableCount != 0:
+
+            if theSameTableCount == 0 or table_real_name == table_name:
+                form_table.save()
+                return render(request, "add_table.html",
+                              {'afterAdd': True, 'addedTableName': table_name, 'isInEditMode': isInEditMode})
+
+            else:
                 return render(request, "add_table.html", {'tableExist': True, 'tableName': table_name,
                                                           'description': description,
                                                           'numberOfSeats': number_of_seats,
                                                           'isInEditMode': isInEditMode})
 
-            form_table.save()
-            return render(request, "add_table.html",
-                          {'afterAdd': True, 'addedTableName': table_name, 'isInEditMode': isInEditMode})
         else:
             errors = form_table.errors
             return render(request, 'add_table.html',

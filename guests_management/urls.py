@@ -25,6 +25,6 @@ urlpatterns = [
     # start api
     path('api/guests/', api.guest_list_endpoint, name='guest-list-endpoint'),
     path('api/guests/<int:guest_id>/', api.one_guest_endpoint, name='one-guest-endpoint'),
-    path('api/ta/<int:table_id>', api.delete, name='delete-objects'),
+    path('api/table/<int:table_id>', api.delete, name='delete-objects'),
     # end api
 ]

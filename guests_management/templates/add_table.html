@@ -37,14 +37,20 @@
 
 
             {% if afterAdd %}
-            <p class="confirmation_container container">
-                Stolik {{ AddedTableName }} został poprawie dodany do listy stolików.
-            </p>
+                {% if isInEditMode %}
+                    <p class="confirmation_container container">
+                        The {{ addedTableName }} is correctly edited.
+                </p>
+                {% else %}
+                    <p class="confirmation_container container">
+                        The {{ tableName }} is correctly added to the table list.
+                    </p>
+                {% endif %}
             {% endif %}
 
             {% if tableExist %}
             <p class="error_container container">
-                Stolik {{ tableName }} już jest na liście!
+                The {{ tableName }} is already on the list!
             </p>
             {% endif %}
 
