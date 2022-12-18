@@ -18,7 +18,10 @@ class Tables(models.Model):
         db_table = 'Tables'
 
     number_of_seats = models.IntegerField()
+    table_name = models.CharField(max_length=15, null=True)
+    description = models.CharField(max_length=100, null=True)
 
+    objects = models.Manager()
 
 class Seats(models.Model):
     class Meta:

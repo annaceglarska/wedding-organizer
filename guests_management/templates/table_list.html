@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_content %}
+
+<h1> Table list </h1>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Number of seats</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+
+        {% for table in tables %}
+        <tr>
+            <td>{{ table.id }}</td>
+            <td>{{ table.table_name }}</td>
+            <td>{{ table.description }}</td>
+            <td>{{ table.number_of_seats }}</td>
+            <td><a href="{% url 'one-table-form' table.pk %}" class="btn btn-primary btn-sm active"
+                   role="button" aria-pressed="true">Edit</a></td>
+            <td><button type="button" class="btn btn-secondary btn-sm active"
+                   role="button" aria-pressed="true " data-type="delete" data-table-id="{{ table.id }}" data-table-name="{{ table.table_name }}">Delete</button></td>
+        </tr>
+        {% endfor %}
+    </thead>
+</table>
+{% include "delete.html" %}
+
+<!--Modal js-->
+    <script src="{% static 'js/delete.js' %}"
+            ></script>
+
+{% endblock %}
