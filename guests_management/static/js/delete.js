@@ -28,7 +28,7 @@ modalDeleteBtn.addEventListener('click', async (e) => {
         })
 
         $('#exampleModal').modal('hide')
-       // location.reload();
+        location.reload();
     } catch (error) {
         console.log(error)
     }
