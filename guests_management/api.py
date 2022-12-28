@@ -26,3 +26,14 @@ def delete(request, table_id):
         return HttpResponse(responseJson, content_type="application/json")
     else:
         return HttpResponseBadRequest()
+
+
+@csrf_exempt
+def delete_guest(request, guest_id):
+    if request.method == "DELETE":
+        Guests.objects.filter(id=guest_id).delete()
+        resp = {'status': 'OK'}
+        responseJson = json.dumps(resp)
+        return HttpResponse(responseJson, content_type="application/json")
+    else:
+        return HttpResponseBadRequest()

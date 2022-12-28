@@ -37,7 +37,6 @@ def one_guest_with_params(request):
 
 def add_new_guest(request):
     if request.method == 'POST':
-        # przetwórz odebrane dane i wyswietl
         form_guest = AddGuest(request.POST)
         if form_guest.is_valid():
             name = request.POST.get('name')
@@ -55,9 +54,41 @@ def add_new_guest(request):
             return render(request, "add_guest.html", {'errorGuest': True, 'errorsList': errors})
 
     else:
-        # wyswietl formularz do pobierania danych
         form_guest = AddGuest()
         return render(request, 'add_guest.html', {})
+
+
+def edit_guest(request, guest_id):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        surname = request.POST.get('surname')
+        phone = request.POST.get('phone')
+        age = request.POST.get('age')
+
+        guestToEdit = Guests.objects.get(id=guest_id)
+        guestRealName = guestToEdit.name
+        guestRealSurname = guestToEdit.surname
+        editGuestForm = AddGuest(request.POST, instance=guestToEdit)
+
+        if editGuestForm.is_valid():
+            theSameGuestCount = Guests.objects.filter(name=name, surname=surname).count()
+
+            if theSameGuestCount == 0 or (guestRealName == name and guestRealSurname == surname):
+                editGuestForm.save()
+                return render(request, "edit_guest.html", {'addedGuestName': name, 'addedGuestSurname': surname,  'afterAdd': True})
+            else:
+                return render(request, "edit_guest.html", {'guestExist': True, 'guestName': name, 'guestSurname': surname, 'guestPhone': phone,
+                                                       'guestAge': age})
+        else:
+            errors = editGuestForm.errors
+            return render(request, "edit_guest.html", {'errorTable': True, 'errorList': errors,
+                                                       'guestName': name, 'guestSurname': surname,
+                                                       'guestPhone': phone, 'guestAge': age})
+
+    else:
+        guestToEdit = Guests.objects.get(id=guest_id)
+        return render(request, 'edit_guest.html', {'guestName': guestToEdit.name, 'guestSurname': guestToEdit.surname,
+                                                   'guestPhone': guestToEdit.phone, 'guestAge': guestToEdit.age})
 
 
 def core_new_table(request, table_id):
