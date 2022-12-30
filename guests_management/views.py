@@ -38,20 +38,24 @@ def one_guest_with_params(request):
 def add_new_guest(request):
     if request.method == 'POST':
         form_guest = AddGuest(request.POST)
+        name = request.POST.get('name')
+        surname = request.POST.get('surname')
+        phone = request.POST.get('phone')
+        age = request.POST.get('age')
         if form_guest.is_valid():
-            name = request.POST.get('name')
-            surname = request.POST.get('surname')
-            phone = request.POST.get('phone')
-            age = request.POST.get('age')
-            theSameUserCount = Guests.objects.filter(name = name, surname = surname).count()
+
+            theSameUserCount = Guests.objects.filter(name=name, surname=surname).count()
             if theSameUserCount != 0:
-                return render(request, "add_guest.html", {'guestExist': True, 'guestName': name, 'guestSurname': surname, 'guestPhone': phone, 'guestAge': age})
+                return render(request, "add_guest.html",
+                              {'guestExist': True, 'guestName': name, 'guestSurname': surname, 'guestPhone': phone,
+                               'guestAge': age})
 
             form_guest.save()
             return render(request, "add_guest.html", {'afterAdd': True, 'addedGuestName': name})
         else:
             errors = form_guest.errors
-            return render(request, "add_guest.html", {'errorGuest': True, 'errorsList': errors})
+            return render(request, "add_guest.html", {'errorGuest': True, 'errorsList': errors, 'guestName': name,
+                                                      'guestSurname': surname, 'guestPhone': phone, 'guestAge': age})
 
     else:
         form_guest = AddGuest()
@@ -75,10 +79,12 @@ def edit_guest(request, guest_id):
 
             if theSameGuestCount == 0 or (guestRealName == name and guestRealSurname == surname):
                 editGuestForm.save()
-                return render(request, "edit_guest.html", {'addedGuestName': name, 'addedGuestSurname': surname,  'afterAdd': True})
+                return render(request, "edit_guest.html",
+                              {'addedGuestName': name, 'addedGuestSurname': surname, 'afterAdd': True})
             else:
-                return render(request, "edit_guest.html", {'guestExist': True, 'guestName': name, 'guestSurname': surname, 'guestPhone': phone,
-                                                       'guestAge': age})
+                return render(request, "edit_guest.html",
+                              {'guestExist': True, 'guestName': name, 'guestSurname': surname, 'guestPhone': phone,
+                               'guestAge': age})
         else:
             errors = editGuestForm.errors
             return render(request, "edit_guest.html", {'errorTable': True, 'errorList': errors,
@@ -126,9 +132,9 @@ def core_new_table(request, table_id):
             errors = form_table.errors
             return render(request, 'add_table.html',
                           {'errorTable': True, 'errorList': errors, 'tableName': table_name,
-                                                          'description': description,
-                                                          'numberOfSeats': number_of_seats,
-                                                          'isInEditMode': isInEditMode})
+                           'description': description,
+                           'numberOfSeats': number_of_seats,
+                           'isInEditMode': isInEditMode})
     else:
         if isInEditMode:
             table_to_edit = Tables.objects.get(id=table_id)
@@ -146,11 +152,3 @@ def add_new_table(request):
 
 def edit_new_table(request, table_id):
     return core_new_table(request, table_id)
-
-
-
-
-
-
-
-
