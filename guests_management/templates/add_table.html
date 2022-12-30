@@ -30,7 +30,12 @@
             </div>
 
             {% if isInEditMode %}
-                <button type="submit" class="btn btn-secondary">Edit</button>
+                {% if not afterAdd %}
+                    <button type="submit" class="btn btn-secondary">Edit</button>
+                {% else %}
+                    <td><a href="{% url 'table-list' %}" class="btn btn-secondary btn-lg active"
+                    role="button" aria-pressed="true">Back to Table list</a></td>
+                {% endif %}
             {% else %}
                 <button type="submit" class="btn btn-secondary">Add</button>
             {% endif %}

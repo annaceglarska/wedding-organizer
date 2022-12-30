@@ -12,6 +12,7 @@ urlpatterns = [
     path('guests/filter/', views.one_guest_with_params, name='guest-with-params'),
     path('guests/<int:guest_id>/', views.one_guest, name='one-guest'),
     path('guests/add-new-guest/', views.add_new_guest, name='form-add-new-guest'),
+    path('guests/edit-guest/<int:guest_id>', views.edit_guest, name='edit-guest'),
     #  end guests
 
     # start table
@@ -26,5 +27,6 @@ urlpatterns = [
     path('api/guests/', api.guest_list_endpoint, name='guest-list-endpoint'),
     path('api/guests/<int:guest_id>/', api.one_guest_endpoint, name='one-guest-endpoint'),
     path('api/table/<int:table_id>', api.delete, name='delete-objects'),
+    path('api/guest-delete/<int:guest_id>', api.delete_guest, name='delete-guest'),
     # end api
 ]
