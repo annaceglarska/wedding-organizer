@@ -1,6 +1,6 @@
 const deleteBtns = document.querySelectorAll('button[data-type="delete"]')
 const modalTextContainer = document.querySelector('div.modal-body p')
-const modalDeleteBtn = document.querySelector('button[data-type="delete-table"]')
+const modalDeleteBtn = document.querySelector('button[data-type="delete-element"]')
 const deleteBtnsAsArray = Array.from(deleteBtns);
 
 const getMessageTemplate = (tableName) => `

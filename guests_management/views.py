@@ -1,4 +1,4 @@
-from .models import Guests, Tables
+from .models import Guests, Tables, Seats
 from django.shortcuts import render
 from .forms import AddGuest, AddTable
 
@@ -109,6 +109,7 @@ def core_new_table(request, table_id):
             table_to_edit = Tables.objects.get(id=table_id)
             table_real_name = table_to_edit.table_name
             form_table = AddTable(request.POST, instance=table_to_edit)
+            old_number_of_seats = Seats.objects.filter(table=table_id).count()
         else:
             form_table = AddTable(request.POST)
             table_real_name = ''
@@ -119,8 +120,14 @@ def core_new_table(request, table_id):
 
             if theSameTableCount == 0 or table_real_name == table_name:
                 form_table.save()
+                if isInEditMode:
+                    edit_seats(table_id, int(number_of_seats), old_number_of_seats)
+                else:
+                    just_created_table = Tables.objects.get(table_name=table_name)
+                    create_seats(just_created_table.pk, just_created_table.number_of_seats)
+
                 return render(request, "add_table.html",
-                              {'afterAdd': True, 'addedTableName': table_name, 'isInEditMode': isInEditMode})
+                              {'afterAdd': True, 'tableName': table_name, 'isInEditMode': isInEditMode})
 
             else:
                 return render(request, "add_table.html", {'tableExist': True, 'tableName': table_name,
@@ -152,3 +159,17 @@ def add_new_table(request):
 
 def edit_new_table(request, table_id):
     return core_new_table(request, table_id)
+
+
+def create_seats(table_number, current_number_of_seats, old_number_of_seats=0):
+    for place_by_table in range(old_number_of_seats + 1, current_number_of_seats + 1):
+        seat = Seats(seat_number=place_by_table, table_id=table_number)
+        seat.save()
+
+
+def edit_seats(table_number, current_number_of_seats, old_number_of_seats):
+    if old_number_of_seats < current_number_of_seats:
+        create_seats(table_number, current_number_of_seats,  old_number_of_seats)
+    elif old_number_of_seats > current_number_of_seats:
+        for place_by_table in range(old_number_of_seats + 1, current_number_of_seats, -1):
+            Seats.objects.filter(seat_number=place_by_table, table=table_number).delete()
