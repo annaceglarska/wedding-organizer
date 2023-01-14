@@ -23,6 +23,7 @@ class Tables(models.Model):
 
     objects = models.Manager()
 
+
 class Seats(models.Model):
     class Meta:
         db_table = 'Seats'
@@ -37,4 +38,3 @@ class Seating(models.Model):
 
     guest = models.ForeignKey(Guests, on_delete=models.CASCADE)
     seat = models.ForeignKey(Seats, on_delete=models.CASCADE)
-
