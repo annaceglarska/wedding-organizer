@@ -1,8 +1,9 @@
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.core.serializers import serialize
-from .models import Guests, Tables, Seats
+from .models import Guests, Tables, Seats, Seating
 from django.views.decorators.csrf import csrf_exempt
 import json
+from .helpers import free_seat_for_table
 
 
 def guest_list_endpoint(request):
@@ -18,10 +19,16 @@ def one_guest_endpoint(request, guest_id):
 
 
 @csrf_exempt
-def delete(request, table_id):
+def get_free_seats_in_table(request, table_id):
+    free_seats = free_seat_for_table(table_id)
+    response_Json = json.dumps(free_seats)
+    return HttpResponse(response_Json, content_type="application/json")
+
+
+@csrf_exempt
+def delete_seating(request, seat_id):
     if request.method == "DELETE":
-        delete_seats(table_id)
-        Tables.objects.filter(id=table_id).delete()
+        Seating.objects.filter(seat_id=seat_id).delete()
         resp = {'status': 'OK'}
         responseJson = json.dumps(resp)
         return HttpResponse(responseJson, content_type="application/json")
@@ -29,8 +36,15 @@ def delete(request, table_id):
         return HttpResponseBadRequest()
 
 
-def delete_seats(table_id):
-    Seats.objects.filter(table=table_id).delete()  # Ta funkcja ma byc tutaj czy w views?
+@csrf_exempt
+def delete(request, table_id):
+    if request.method == "DELETE":
+        Tables.objects.filter(id=table_id).delete()
+        resp = {'status': 'OK'}
+        responseJson = json.dumps(resp)
+        return HttpResponse(responseJson, content_type="application/json")
+    else:
+        return HttpResponseBadRequest()
 
 
 @csrf_exempt

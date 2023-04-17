@@ -1,6 +1,8 @@
 from .models import Guests, Tables, Seats
 from django.shortcuts import render
-from .forms import AddGuest, AddTable
+from .forms import AddGuest, AddTable, Seating, AddSeating
+from .helpers import guest_not_assign_to_seat, tables_able_to_assign_guest, \
+    find_seat_assign_to_the_guest, find_table_name_assign_to_the_guest
 
 
 def wedding_organizer_start_name(request):
@@ -10,6 +12,13 @@ def wedding_organizer_start_name(request):
 
 def guest_list(request):
     guests = Guests.objects.all()
+    for one_guest in guests:
+        guest_seating = Seating.objects.filter(guest_id=one_guest.id).first()
+        if guest_seating:
+            seat = find_seat_assign_to_the_guest(guest_seating)
+            one_guest.seat_number = seat.seat_number
+            one_guest.table_name = find_table_name_assign_to_the_guest(seat)
+
     return render(request, 'guest_list.html', {'guests': guests})
 
 
@@ -47,15 +56,17 @@ def add_new_guest(request):
             theSameUserCount = Guests.objects.filter(name=name, surname=surname).count()
             if theSameUserCount != 0:
                 return render(request, "add_guest.html",
-                              {'guestExist': True, 'guestName': name, 'guestSurname': surname, 'guestPhone': phone,
+                              {'guestExist': True, 'guestName': name, 'guestSurname': surname,
+                               'guestPhone': phone,
                                'guestAge': age})
 
             form_guest.save()
             return render(request, "add_guest.html", {'afterAdd': True, 'addedGuestName': name})
         else:
             errors = form_guest.errors
-            return render(request, "add_guest.html", {'errorGuest': True, 'errorsList': errors, 'guestName': name,
-                                                      'guestSurname': surname, 'guestPhone': phone, 'guestAge': age})
+            return render(request, "add_guest.html",
+                          {'errorGuest': True, 'errorsList': errors, 'guestName': name,
+                           'guestSurname': surname, 'guestPhone': phone, 'guestAge': age})
 
     else:
         form_guest = AddGuest()
@@ -80,10 +91,12 @@ def edit_guest(request, guest_id):
             if theSameGuestCount == 0 or (guestRealName == name and guestRealSurname == surname):
                 editGuestForm.save()
                 return render(request, "edit_guest.html",
-                              {'addedGuestName': name, 'addedGuestSurname': surname, 'afterAdd': True})
+                              {'addedGuestName': name, 'addedGuestSurname': surname,
+                               'afterAdd': True})
             else:
                 return render(request, "edit_guest.html",
-                              {'guestExist': True, 'guestName': name, 'guestSurname': surname, 'guestPhone': phone,
+                              {'guestExist': True, 'guestName': name, 'guestSurname': surname,
+                               'guestPhone': phone,
                                'guestAge': age})
         else:
             errors = editGuestForm.errors
@@ -93,8 +106,9 @@ def edit_guest(request, guest_id):
 
     else:
         guestToEdit = Guests.objects.get(id=guest_id)
-        return render(request, 'edit_guest.html', {'guestName': guestToEdit.name, 'guestSurname': guestToEdit.surname,
-                                                   'guestPhone': guestToEdit.phone, 'guestAge': guestToEdit.age})
+        return render(request, 'edit_guest.html',
+                      {'guestName': guestToEdit.name, 'guestSurname': guestToEdit.surname,
+                       'guestPhone': guestToEdit.phone, 'guestAge': guestToEdit.age})
 
 
 def core_new_table(request, table_id):
@@ -127,13 +141,15 @@ def core_new_table(request, table_id):
                     create_seats(just_created_table.pk, just_created_table.number_of_seats)
 
                 return render(request, "add_table.html",
-                              {'afterAdd': True, 'tableName': table_name, 'isInEditMode': isInEditMode})
+                              {'afterAdd': True, 'tableName': table_name,
+                               'isInEditMode': isInEditMode})
 
             else:
-                return render(request, "add_table.html", {'tableExist': True, 'tableName': table_name,
-                                                          'description': description,
-                                                          'numberOfSeats': number_of_seats,
-                                                          'isInEditMode': isInEditMode})
+                return render(request, "add_table.html",
+                              {'tableExist': True, 'tableName': table_name,
+                               'description': description,
+                               'numberOfSeats': number_of_seats,
+                               'isInEditMode': isInEditMode})
 
         else:
             errors = form_table.errors
@@ -169,7 +185,82 @@ def create_seats(table_number, current_number_of_seats, old_number_of_seats=0):
 
 def edit_seats(table_number, current_number_of_seats, old_number_of_seats):
     if old_number_of_seats < current_number_of_seats:
-        create_seats(table_number, current_number_of_seats,  old_number_of_seats)
+        create_seats(table_number, current_number_of_seats, old_number_of_seats)
     elif old_number_of_seats > current_number_of_seats:
         for place_by_table in range(old_number_of_seats + 1, current_number_of_seats, -1):
             Seats.objects.filter(seat_number=place_by_table, table=table_number).delete()
+
+
+def create_seating(request):
+    free_guests = guest_not_assign_to_seat()
+    free_tables = tables_able_to_assign_guest()
+
+    if request.method == 'POST':
+        seating_form = AddSeating(request.POST)
+        guest = request.POST.get('guest')
+        seat_number = request.POST.get('seat')
+
+        if seating_form.is_valid():
+
+            the_same_guest_in_seating_count = Seating.objects.filter(guest_id=guest).count()
+            the_same_seat_in_seating_count = Seating.objects.filter(seat_id=seat_number).count()
+            if the_same_guest_in_seating_count != 0 and the_same_seat_in_seating_count != 0:
+                return render(request, 'seating_form.html', {'seating_exist': True,
+                                                             'guests': free_guests,
+                                                             'tables': free_tables})
+
+            seating_form.save()
+            guest = int(guest)
+            guest_object = Guests.objects.get(id=guest)
+            return render(request, 'seating_form.html', {'after_add': True,
+                                                         'seated_guest': guest_object,
+                                                         'guests': free_guests,
+                                                         'tables': free_tables})
+        else:
+            errors = seating_form.errors
+            return render(request, 'seating_form.html', {'errorGuest': True, 'error_list': errors,
+                                                         'guests': free_guests,
+                                                         'tables': free_tables})
+    else:
+        seating_form = AddSeating()
+        return render(request, 'seating_form.html', {'guests': free_guests, 'tables': free_tables})
+
+
+def edit_seating(request, seating_id):
+    free_guests = guest_not_assign_to_seat()
+    free_tables = tables_able_to_assign_guest()
+
+    seating = Seating.objects.get(id=seating_id)
+    seat = find_seat_assign_to_the_guest(seating)
+    table_name = find_table_name_assign_to_the_guest(seat)
+    guest_id = seating.guest_id
+
+
+    if request.method == 'POST':
+        guest = request.POST.get('guest')
+        table = request.POST.get('table')
+        seat_number = request.POST.get('seat')
+
+        seating_to_edit = Seating.objects.get(id=seating_id)
+        edit_seating_form = AddSeating(request.POST, instance=seating_to_edit)
+
+        if edit_seating_form.is_valid():
+            edit_seating_form.save()
+            return render(request, 'seating_form.html',
+                          {'edition': True, 'after_add': True, 'guest': guest,
+                           'table_name': table_name,
+                           'seat_number': seat.seat_number})
+        else:
+            errors = edit_seating_form.errors
+            return render(request, 'seating_form.html', {'edition': True, 'errorGuest': True,
+                                                         'error_list': errors,
+                                                         'guests': free_guests,
+                                                         'tables': free_tables,
+                                                         'guest': guest, 'table_name': table_name,
+                                                         'seat_number': seat.seat_number
+                                                         })
+    else:
+        return render(request, 'seating_form.html', {'edition': True, 'guests': free_guests,
+                                                     'tables': free_tables, 'guest': guest,
+                                                     'table_name': table_name,
+                                                     'seat_number': seat.seat_number})

@@ -31,6 +31,8 @@ class Seats(models.Model):
     seat_number = models.IntegerField()
     table = models.ForeignKey(Tables, on_delete=models.CASCADE)
 
+    objects = models.Manager()
+
 
 class Seating(models.Model):
     class Meta:
@@ -38,3 +40,5 @@ class Seating(models.Model):
 
     guest = models.ForeignKey(Guests, on_delete=models.CASCADE)
     seat = models.ForeignKey(Seats, on_delete=models.CASCADE)
+
+    objects = models.Manager()
