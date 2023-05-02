@@ -1,5 +1,5 @@
-from django.forms import ModelForm
-from .models import Guests, Tables
+from django.forms import ModelForm, ModelChoiceField, Select
+from .models import Guests, Tables, Seating
 
 
 class AddGuest(ModelForm):
@@ -12,4 +12,10 @@ class AddTable(ModelForm):
     class Meta:
         model = Tables
         fields = ['number_of_seats', 'table_name', 'description']
+
+
+class AddSeating(ModelForm):
+    class Meta:
+        model = Seating
+        fields = ['guest', 'seat']
 
