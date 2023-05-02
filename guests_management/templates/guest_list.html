@@ -14,6 +14,8 @@
             <th>Edit</th>
             <th>Delete</th>
             <th>Seating [table name - seat number]</th>
+            <th>Edit seating</th>
+            <th>Delete seating</th>
         </tr>
 
         {% for guest in guests %}
@@ -31,6 +33,18 @@
                         data-guest-name="{{ guest.name }}" data-guest-surname="{{ guest.surname }}">
                 Delete</button></td>
             <td>{{ guest.table_name }} - {{ guest.seat_number }}</td>
+            <td>
+                  {% if guest.seating_id %}
+           <a href="{% url 'edit-seating' guest.seating_id %}" class="btn btn-primary btn-sm active"
+                   role="button" aria-pressed="true">Edit</a>
+            {% endif %}
+                </td>
+             <td>
+                  {% if guest.seating_id %}
+           <a href="{% url 'delete-seating' guest.seating_id %}" class="btn btn-primary btn-sm active"
+                   role="button" aria-pressed="true">Delete</a>
+            {% endif %}
+                </td>
         </tr>
         {% endfor %}
      </thead>

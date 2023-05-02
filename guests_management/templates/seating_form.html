@@ -6,8 +6,8 @@
     <div>
         {% if edition %}
         <h1>Edit seating</h1>
-        <h3>{{ guest.name }} {{guest.surname }} seat: {{ table_name }} - {{ seat_number }}</h3>
-        <h3>Select new position or cancel.</h3>
+        <h3>{{ guest.name }} {{guest.surname }}: {{ table_name }} - seat {{ seat_number }}</h3>
+        <h5>Select new position or cancel.</h5>
         {% else %}
         <h1>Assign guest to the seat</h1>
         {% endif %}
@@ -16,9 +16,11 @@
             <div class="input-group mb-3">
 
               <select class="custom-select" id="guest" name="guest" required>
-                    <option value="" disabled selected>Select guest</option>
+                    <option value="" disabled {% if edition == Null or edition == False %}
+                      selected {% endif %}>Select guest</option>
                   {% for guest in guests %}
-                    <option value="{{guest.id}}">{{ guest.name }} {{ guest.surname }}</option>
+                    <option value="{{guest.id}}" {% if edition %}
+                      selected {% endif %}>{{ guest.name }} {{ guest.surname }}</option>
                   {% endfor %}
               </select>
             </div>
@@ -40,8 +42,8 @@
 
             {% if edition %}
                 {% if after_add %}
-                    <td><a href="{% url 'guest-list' %}" class="btn btn-secondary btn-lg active"
-                    role="button" aria-pressed="true">Back to Guest list</a></td>
+                    <a href="{% url 'guest-list' %}" class="btn btn-secondary btn-lg active"
+                    role="button" aria-pressed="true">Back to Guest list</a>
                 {% else %}
                     <button type="submit" class="btn btn-secondary">Edit</button>
                 {% endif %}

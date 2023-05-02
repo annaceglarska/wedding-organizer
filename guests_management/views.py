@@ -1,5 +1,5 @@
 from .models import Guests, Tables, Seats
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .forms import AddGuest, AddTable, Seating, AddSeating
 from .helpers import guest_not_assign_to_seat, tables_able_to_assign_guest, \
     find_seat_assign_to_the_guest, find_table_name_assign_to_the_guest
@@ -18,6 +18,7 @@ def guest_list(request):
             seat = find_seat_assign_to_the_guest(guest_seating)
             one_guest.seat_number = seat.seat_number
             one_guest.table_name = find_table_name_assign_to_the_guest(seat)
+            one_guest.seating_id = guest_seating.id
 
     return render(request, 'guest_list.html', {'guests': guests})
 
@@ -227,14 +228,14 @@ def create_seating(request):
 
 
 def edit_seating(request, seating_id):
-    free_guests = guest_not_assign_to_seat()
     free_tables = tables_able_to_assign_guest()
 
     seating = Seating.objects.get(id=seating_id)
     seat = find_seat_assign_to_the_guest(seating)
     table_name = find_table_name_assign_to_the_guest(seat)
     guest_id = seating.guest_id
-
+    guest = Guests.objects.get(id=guest_id)
+    guest_to_render = [guest]
 
     if request.method == 'POST':
         guest = request.POST.get('guest')
@@ -247,20 +248,26 @@ def edit_seating(request, seating_id):
         if edit_seating_form.is_valid():
             edit_seating_form.save()
             return render(request, 'seating_form.html',
-                          {'edition': True, 'after_add': True, 'guest': guest,
-                           'table_name': table_name,
-                           'seat_number': seat.seat_number})
+                          {'edition': True, 'after_add': True, 'guests': guest_to_render,
+                           'guest': guest, 'table_name': table_name, 'seat_number': seat.seat_number})
         else:
             errors = edit_seating_form.errors
-            return render(request, 'seating_form.html', {'edition': True, 'errorGuest': True,
+            return render(request, 'seating_form.html', {'edition': True, 'error_seating': True,
                                                          'error_list': errors,
-                                                         'guests': free_guests,
+                                                         'guests': guest_to_render,
                                                          'tables': free_tables,
                                                          'guest': guest, 'table_name': table_name,
                                                          'seat_number': seat.seat_number
                                                          })
     else:
-        return render(request, 'seating_form.html', {'edition': True, 'guests': free_guests,
-                                                     'tables': free_tables, 'guest': guest,
+        return render(request, 'seating_form.html', {'edition': True, 'guests': guest_to_render,
+                                                     'tables': free_tables,
                                                      'table_name': table_name,
-                                                     'seat_number': seat.seat_number})
+                                                     'seat_number': seat.seat_number,
+                                                     'guest': guest})
+
+
+def delete_seating(request, seating_id):
+    Seating.objects.filter(id=seating_id).delete()
+    return redirect(guest_list)
+

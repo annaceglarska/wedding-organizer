@@ -26,6 +26,7 @@ urlpatterns = [
     # start seating
     path('seating/add-seating', views.create_seating, name='add-seating'),
     path('seating/edit-seating/<int:seating_id>', views.edit_seating, name='edit-seating'),
+    path('seating/delete-seating/<int:seating_id>', views.delete_seating, name='delete-seating'),
     # end seating
 
     # start api
@@ -34,6 +35,6 @@ urlpatterns = [
     path('api/table/<int:table_id>', api.delete, name='delete-objects'),
     path('api/guest-delete/<int:guest_id>', api.delete_guest, name='delete-guest'),
     path('api/seat/<int:table_id>', api.get_free_seats_in_table, name='get-seats'),
-    path('api/seating/<int:seats_id>', api.delete_seating, name='delete-seating'),
+    path('api/seating/<int:seats_id>', api.delete_seating, name='delete-seating-api'),
     # end api
 ]
