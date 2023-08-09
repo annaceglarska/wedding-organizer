@@ -52,21 +52,22 @@
             {% endif %}
 
 
-            {% if after_add %}
+            {% if status_type == StatusEnum.OK %}
                 <p class="confirmation_container container">
-                Guest {{ seated_guest.name }} {{ seated_guest.surname }} was seated correctly.
+                Guest {{ guest.name }} {{ guest.surname }} was seated correctly.
                 </p>
             {% endif %}
 
-            {% if seating_exist %}
-            <p class="error_container container">
-                Such seating is already on the list!
-            </p>
+            {% if error_type == ErrorsEnum.SEATING_EXIST %}
+
+                <p class="error_container container">
+                    Such seating is already on the list! {{error_type }}
+                </p>
             {% endif %}
 
-            {% if error_seating %}
+            {% if error_type == ErrorsEnum.GUEST_ERROR %}
             <div class="validation_error_container container">
-                Guest {{ seated_guest }} was NOT seated correctly.
+                Guest {{ guest }} was NOT seated correctly.
                 {{ error_list }}
             </div>
             {% endif %}
