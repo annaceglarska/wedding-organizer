@@ -1,9 +1,9 @@
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.core.serializers import serialize
-from .models import Guests, Tables, Seats, Seating
+from .models import Guests, Tables, Seating, Seats
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .helpers import free_seat_for_table
+from .helpers import free_seat_for_table, get_seats_with_seating_by_one_table
 
 
 def guest_list_endpoint(request):
@@ -56,3 +56,16 @@ def delete_guest(request, guest_id):
         return HttpResponse(responseJson, content_type="application/json")
     else:
         return HttpResponseBadRequest()
+
+
+@csrf_exempt
+def seating_by_one_table(request, table_id):
+    taken_seats = get_seats_with_seating_by_one_table(table_id)
+    response_json = json.dumps(taken_seats)
+    return HttpResponse(response_json, content_type="application/json")
+
+
+
+
+
+

@@ -1,3 +1,5 @@
+from django.forms import model_to_dict
+
 from .models import Guests, Seating, Tables, Seats
 
 
@@ -52,6 +54,32 @@ def find_table_name_assign_to_the_guest(seat):
     table = Tables.objects.get(id=table_id)
     table_name = table.table_name
     return table_name
+
+
+def get_seats_with_seating_by_one_table(table_id, with_empty_seats=False):
+    seats_by_table = Seats.objects.filter(table_id=table_id)
+    responseArray = []
+    for seat in seats_by_table:
+        seating = Seating.objects.filter(seat_id=seat.id).first()
+        seat_dict = {
+                'id': seat.id,
+                'seat_number': seat.seat_number,
+                'table_id': table_id,
+            }
+        if seating:
+            guest_id = seating.guest_id
+            guest = Guests.objects.get(id=guest_id)
+            seat_dict['seating_id'] = seating.id
+            seat_dict['guest'] = {
+                "name": guest.name,
+                "surname": guest.surname
+            }
+            responseArray.append(seat_dict)
+
+        if with_empty_seats and not seating:
+            responseArray.append(seat_dict)
+
+    return responseArray
 
 
 

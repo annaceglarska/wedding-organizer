@@ -17,7 +17,8 @@
             <th>Edit seating</th>
             <th>Delete seating</th>
         </tr>
-
+        </thead>
+        <body>
         {% for guest in guests %}
         <tr>
             <td>{{ guest.id }}</td>
@@ -47,7 +48,7 @@
                 </td>
         </tr>
         {% endfor %}
-     </thead>
+  </body>
  </table>
 
 {% include "delete.html" %}
