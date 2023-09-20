@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 def forDjango(cls):
     cls.do_not_call_in_templates = True
     return cls
@@ -7,8 +8,12 @@ def forDjango(cls):
 
 @forDjango
 class ErrorsEnum(Enum):
-    SEATING_EXIST = 1
-    GUEST_ERROR = 2
+    SEATING_ERROR = 1
+    SEATING_EXIST = 2
+    GUEST_ERROR = 3
+    GUEST_EXIST = 4
+    TABLE_EXIST = 5
+    TABLE_ERROR = 6
 
 
 @forDjango

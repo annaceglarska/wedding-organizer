@@ -15,6 +15,19 @@ def guest_not_assign_to_seat():
     return guests
 
 
+def get_guest_with_seating():
+    guests = Guests.objects.all()
+    for one_guest in guests:
+        guest_seating = Seating.objects.filter(guest_id=one_guest.id).first()
+        if guest_seating:
+            seat = find_seat_assign_to_the_guest(guest_seating)
+            one_guest.seat_number = seat.seat_number
+            one_guest.table_name = find_table_name_assign_to_the_guest(seat)
+            one_guest.seating_id = guest_seating.id
+
+    return guests
+
+
 def tables_able_to_assign_guest():
     tables = []
     all_tables = Tables.objects.all()
@@ -81,6 +94,19 @@ def get_seats_with_seating_by_one_table(table_id, with_empty_seats=False):
 
     return responseArray
 
+
+def create_seats(table_number, current_number_of_seats, old_number_of_seats=0):
+    for place_by_table in range(old_number_of_seats + 1, current_number_of_seats + 1):
+        seat = Seats(seat_number=place_by_table, table_id=table_number)
+        seat.save()
+
+
+def edit_seats(table_number, current_number_of_seats, old_number_of_seats):
+    if old_number_of_seats < current_number_of_seats:
+        create_seats(table_number, current_number_of_seats, old_number_of_seats)
+    elif old_number_of_seats > current_number_of_seats:
+        for place_by_table in range(old_number_of_seats + 1, current_number_of_seats, -1):
+            Seats.objects.filter(seat_number=place_by_table, table=table_number).delete()
 
 
 

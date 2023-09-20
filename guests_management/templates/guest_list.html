@@ -28,7 +28,7 @@
             <td>{{ guest.age }}</td>
             <td><a href="{% url 'edit-guest' guest.pk %}" class="btn btn-primary btn-sm active"
                    role="button" aria-pressed="true">Edit</a></td>
-            <td><button type="button" class="btn btn-secondary btn-sm active"
+            <td><button type="button" class="btn btn-danger btn-sm active"
                         role="button" aria-pressed="true " data-type="delete"
                         data-guest-id="{{ guest.id }}"
                         data-guest-name="{{ guest.name }}" data-guest-surname="{{ guest.surname }}">
@@ -42,7 +42,7 @@
                 </td>
              <td>
                   {% if guest.seating_id %}
-           <a href="{% url 'delete-seating' guest.seating_id %}" class="btn btn-primary btn-sm active"
+           <a href="{% url 'delete-seating' guest.seating_id %}" class="btn btn-danger btn-sm active"
                    role="button" aria-pressed="true">Delete</a>
             {% endif %}
                 </td>

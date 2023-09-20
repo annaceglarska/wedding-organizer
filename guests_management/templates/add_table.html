@@ -14,23 +14,28 @@
                 <label for="table_name_field">Table name</label>
                 <input type="text" class="form-control" id="table_name_field" name="table_name"
                        placeholder="Enter table name"
-                       value="{{ tableName }}" required>
+                       value="{% if isInEditMode %}{{ tableName }}{% endif %}"
+                       required>
             </div>
 
             <div class="form-group">
                 <label for="description_field">Description</label>
                 <input type="text" class="form-control" id="description_field" name="description"
-                       placeholder="Provide more information about that table" value="{{ description }}" required>
+                       placeholder="Provide more table information"
+                       value="{% if isInEditMode %}{{ description }}{% endif %}"
+                       required>
             </div>
 
             <div class="form-group">
                 <label for="number_of_seats_field">Number Of Seats</label>
                 <input type="number" class="form-control" id="number_of_seats_field" name="number_of_seats"
-                       placeholder="Enter number of seats" value="{{ numberOfSeats }}" required>
+                       placeholder="Enter number of seats"
+                       value="{% if isInEditMode %}{{ numberOfSeats }}{% endif %}"
+                       required>
             </div>
 
             {% if isInEditMode %}
-                {% if not afterAdd %}
+                {% if not status_type == StatusEnum.OK %}
                     <button type="submit" class="btn btn-secondary">Edit</button>
                 {% else %}
                     <td><a href="{% url 'table-list' %}" class="btn btn-secondary btn-lg active"
@@ -40,8 +45,7 @@
                 <button type="submit" class="btn btn-secondary">Add</button>
             {% endif %}
 
-
-            {% if afterAdd %}
+            {% if status_type == StatusEnum.OK %}
                 {% if isInEditMode %}
                     <p class="confirmation_container container">
                         The {{ tableName }} is correctly edited.
@@ -53,13 +57,13 @@
                 {% endif %}
             {% endif %}
 
-            {% if tableExist %}
+            {% if error_type == ErrorsEnum.TABLE_EXIST and status_type == StatusEnum.ERROR %}
             <p class="error_container container">
                 The {{ tableName }} is already on the list!
             </p>
             {% endif %}
 
-            {% if errorTable %}
+            {% if errorList  %}
             <div class="validation_error_container container">
                 {{ errorList }}
             </div>
