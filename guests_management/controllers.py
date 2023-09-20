@@ -1,11 +1,13 @@
+from dataclasses import dataclass
+
 from .enums import StatusEnum, ErrorsEnum
 from .models import Guests, Tables, Seats
 from django.shortcuts import render, redirect
 from .forms import AddGuest, AddTable, Seating, AddSeating
 from .helpers import tables_able_to_assign_guest, \
     find_seat_assign_to_the_guest, find_table_name_assign_to_the_guest, \
-    get_seats_with_seating_by_one_table
-from .views import render_seating_view
+    get_seats_with_seating_by_one_table, get_guest_with_seating, edit_seats, create_seats
+from .views import render_seating_view, add_edit_guest, add_edit_table
 
 
 def wedding_organizer_start_name(request):
@@ -14,16 +16,9 @@ def wedding_organizer_start_name(request):
 
 
 def guest_list(request):
-    guests = Guests.objects.all()
-    for one_guest in guests:
-        guest_seating = Seating.objects.filter(guest_id=one_guest.id).first()
-        if guest_seating:
-            seat = find_seat_assign_to_the_guest(guest_seating)
-            one_guest.seat_number = seat.seat_number
-            one_guest.table_name = find_table_name_assign_to_the_guest(seat)
-            one_guest.seating_id = guest_seating.id
+    guests_with_seating = get_guest_with_seating()
 
-    return render(request, 'guest_list.html', {'guests': guests})
+    return render(request, 'guest_list.html', {'guests': guests_with_seating})
 
 
 def table_list(request):
@@ -51,82 +46,101 @@ def one_guest_with_params(request):
     return render(request, 'guest_list.html', {'guests': guests})
 
 
+@dataclass
+class ErrorInformation:
+    error_type = None
+    error_list = None
+
+
 def add_new_guest(request):
+    @dataclass
+    class GuestObject:
+        name: str = request.POST.get('name')
+        surname: str = request.POST.get('surname')
+        phone: str = request.POST.get('phone')
+        age: str = request.POST.get('age')
+
     if request.method == 'POST':
         form_guest = AddGuest(request.POST)
-        name = request.POST.get('name')
-        surname = request.POST.get('surname')
-        phone = request.POST.get('phone')
-        age = request.POST.get('age')
+        guest = GuestObject()
+        error_information = ErrorInformation()
+
         if form_guest.is_valid():
 
-            theSameUserCount = Guests.objects.filter(name=name, surname=surname).count()
-            if theSameUserCount != 0:
-                return render(request, "add_guest.html",
-                              {'guestExist': True, 'guestName': name, 'guestSurname': surname,
-                               'guestPhone': phone,
-                               'guestAge': age})
+            the_same_user_count = Guests.objects.filter(name=guest.name, surname=guest.surname).count()
+            if the_same_user_count != 0:
+                error_information.error_type = ErrorsEnum.GUEST_EXIST
+                return add_edit_guest(request, status_type=StatusEnum.ERROR, guest_object=guest,
+                                      error_information=error_information)
 
             form_guest.save()
-            return render(request, "add_guest.html", {'afterAdd': True, 'addedGuestName': name})
+            return add_edit_guest(request, status_type=StatusEnum.OK, guest_object=guest)
+
         else:
-            errors = form_guest.errors
-            return render(request, "add_guest.html",
-                          {'errorGuest': True, 'errorsList': errors, 'guestName': name,
-                           'guestSurname': surname, 'guestPhone': phone, 'guestAge': age})
+            error_information.error_list = form_guest.errors
+            error_information.error_type = ErrorsEnum.GUEST_ERROR
+            return add_edit_guest(request, status_type=StatusEnum.ERROR, error_information=error_information, guest_object=guest)
 
     else:
-        form_guest = AddGuest()
-        return render(request, 'add_guest.html', {})
+        return add_edit_guest(request, status_type=StatusEnum.BEFORE_ADD)
 
 
 def edit_guest(request, guest_id):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        surname = request.POST.get('surname')
-        phone = request.POST.get('phone')
-        age = request.POST.get('age')
+        @dataclass
+        class GuestObject:
+            name: str = request.POST.get('name')
+            surname: str = request.POST.get('surname')
+            phone: str = request.POST.get('phone')
+            age: str = request.POST.get('age')
 
-        guestToEdit = Guests.objects.get(id=guest_id)
-        guestRealName = guestToEdit.name
-        guestRealSurname = guestToEdit.surname
-        editGuestForm = AddGuest(request.POST, instance=guestToEdit)
+        guest = GuestObject()
+        error_information = ErrorInformation()
 
-        if editGuestForm.is_valid():
-            theSameGuestCount = Guests.objects.filter(name=name, surname=surname).count()
+        guest_to_edit = Guests.objects.get(id=guest_id)
+        guest_real_name = guest_to_edit.name
+        guest_real_surname = guest_to_edit.surname
+        edit_guest_form = AddGuest(request.POST, instance=guest_to_edit)
 
-            if theSameGuestCount == 0 or (guestRealName == name and guestRealSurname == surname):
-                editGuestForm.save()
-                return render(request, "edit_guest.html",
-                              {'addedGuestName': name, 'addedGuestSurname': surname,
-                               'afterAdd': True})
+        if edit_guest_form.is_valid():
+            theSameGuestCount = Guests.objects.filter(name=guest.name, surname=guest.surname).count()
+
+            if theSameGuestCount == 0 or (guest_real_name == guest.name and guest_real_surname == guest.surname):
+                edit_guest_form.save()
+                return add_edit_guest(request, status_type=StatusEnum.OK, edition=True, guest_object=guest)
+
             else:
-                return render(request, "edit_guest.html",
-                              {'guestExist': True, 'guestName': name, 'guestSurname': surname,
-                               'guestPhone': phone,
-                               'guestAge': age})
+                error_information.error_type = ErrorsEnum.GUEST_EXIST
+                return add_edit_guest(request, status_type=StatusEnum.ERROR, edition=True, guest_object=guest,
+                                      error_information=error_information)
+
         else:
-            errors = editGuestForm.errors
-            return render(request, "edit_guest.html", {'errorTable': True, 'errorList': errors,
-                                                       'guestName': name, 'guestSurname': surname,
-                                                       'guestPhone': phone, 'guestAge': age})
+            error_information.error_list = edit_guest_form.errors
+            error_information.error_type = ErrorsEnum.GUEST_ERROR
+            return add_edit_guest(request, status_type=StatusEnum.ERROR, edition=True, guest_object=guest,
+                                  error_information=error_information)
 
     else:
-        guestToEdit = Guests.objects.get(id=guest_id)
-        return render(request, 'edit_guest.html',
-                      {'guestName': guestToEdit.name, 'guestSurname': guestToEdit.surname,
-                       'guestPhone': guestToEdit.phone, 'guestAge': guestToEdit.age})
+        guest_to_edit = Guests.objects.get(id=guest_id)
+        return add_edit_guest(request, status_type=StatusEnum.BEFORE_ADD, edition=True, guest_object=guest_to_edit)
 
 
 def core_new_table(request, table_id):
-    isInEditMode = bool(table_id)
+
+    @dataclass
+    class TableObject:
+        number_of_seats: str = request.POST.get('number_of_seats')
+        table_name: str = request.POST.get('table_name')
+        description: str = request.POST.get('description')
+
+    table = TableObject()
+    error_information = ErrorInformation()
+
+    is_in_edit_mode = bool(table_id)
 
     if request.method == 'POST':
-        number_of_seats = request.POST.get('number_of_seats')
-        table_name = request.POST.get('table_name')
-        description = request.POST.get('description')
 
-        if isInEditMode:
+        if is_in_edit_mode:
             table_to_edit = Tables.objects.get(id=table_id)
             table_real_name = table_to_edit.table_name
             form_table = AddTable(request.POST, instance=table_to_edit)
@@ -137,43 +151,38 @@ def core_new_table(request, table_id):
 
         if form_table.is_valid():
 
-            theSameTableCount = Tables.objects.filter(table_name=table_name).count()
+            the_same_table_count = Tables.objects.filter(table_name=table.table_name).count()
 
-            if theSameTableCount == 0 or table_real_name == table_name:
+            if the_same_table_count == 0 or table_real_name == table.table_name:
                 form_table.save()
-                if isInEditMode:
-                    edit_seats(table_id, int(number_of_seats), old_number_of_seats)
+                if is_in_edit_mode:
+                    edit_seats(table_id, int(table.number_of_seats), old_number_of_seats)
                 else:
-                    just_created_table = Tables.objects.get(table_name=table_name)
+                    just_created_table = Tables.objects.get(table_name=table.table_name)
                     create_seats(just_created_table.pk, just_created_table.number_of_seats)
 
-                return render(request, "add_table.html",
-                              {'afterAdd': True, 'tableName': table_name,
-                               'isInEditMode': isInEditMode})
+                return add_edit_table(request, status_type=StatusEnum.OK, table_object=table,
+                                      edition_information={'table_to_edit_id': is_in_edit_mode})
 
             else:
-                return render(request, "add_table.html",
-                              {'tableExist': True, 'tableName': table_name,
-                               'description': description,
-                               'numberOfSeats': number_of_seats,
-                               'isInEditMode': isInEditMode})
-
+                error_information.error_type = ErrorsEnum.TABLE_EXIST
+                return add_edit_table(request, status_type=StatusEnum.ERROR, table_object=table,
+                                      edition_information={'table_to_edit_id': is_in_edit_mode},
+                                      error_information=error_information)
         else:
-            errors = form_table.errors
-            return render(request, 'add_table.html',
-                          {'errorTable': True, 'errorList': errors, 'tableName': table_name,
-                           'description': description,
-                           'numberOfSeats': number_of_seats,
-                           'isInEditMode': isInEditMode})
+            error_information.error_list = form_table.errors
+            error_information.error_type = ErrorsEnum.TABLE_ERROR
+            return add_edit_table(request, status_type=StatusEnum.ERROR, table_object=table,
+                                  edition_information={'table_to_edit_id': is_in_edit_mode},
+                                  error_information=error_information)
     else:
-        if isInEditMode:
+        if is_in_edit_mode:
             table_to_edit = Tables.objects.get(id=table_id)
-            return render(request, 'add_table.html', {'tableName': table_to_edit.table_name,
-                                                      'description': table_to_edit.description,
-                                                      'numberOfSeats': table_to_edit.number_of_seats,
-                                                      'isInEditMode': isInEditMode})
+            return add_edit_table(request, status_type=StatusEnum.BEFORE_ADD, table_object=table_to_edit,
+                                  edition_information={'table_to_edit_id': is_in_edit_mode})
         else:
-            return render(request, 'add_table.html', {'isInEditMode': isInEditMode})
+            return add_edit_table(request, status_type=StatusEnum.BEFORE_ADD, table_object=table,
+                                  edition_information={'table_to_edit_id': is_in_edit_mode})
 
 
 def add_new_table(request):
@@ -184,53 +193,56 @@ def edit_new_table(request, table_id):
     return core_new_table(request, table_id)
 
 
-def create_seats(table_number, current_number_of_seats, old_number_of_seats=0):
-    for place_by_table in range(old_number_of_seats + 1, current_number_of_seats + 1):
-        seat = Seats(seat_number=place_by_table, table_id=table_number)
-        seat.save()
-
-
-def edit_seats(table_number, current_number_of_seats, old_number_of_seats):
-    if old_number_of_seats < current_number_of_seats:
-        create_seats(table_number, current_number_of_seats, old_number_of_seats)
-    elif old_number_of_seats > current_number_of_seats:
-        for place_by_table in range(old_number_of_seats + 1, current_number_of_seats, -1):
-            Seats.objects.filter(seat_number=place_by_table, table=table_number).delete()
-
-
 def create_seating(request):
-    if request.method == 'POST':
-        seating_form = AddSeating(request.POST)
+    @dataclass
+    class SeatingObject:
         guest = request.POST.get('guest')
         seat_number = request.POST.get('seat')
 
+    if request.method == 'POST':
+        seating = SeatingObject()
+        error_information = ErrorInformation()
+
+        seating_form = AddSeating(request.POST)
         if seating_form.is_valid():
-            the_same_guest_in_seating_count = Seating.objects.filter(guest_id=guest).count()
-            the_same_seat_in_seating_count = Seating.objects.filter(seat_id=seat_number).count()
+            the_same_guest_in_seating_count = Seating.objects.filter(guest_id=seating.guest).count()
+            the_same_seat_in_seating_count = Seating.objects.filter(seat_id=seating.seat_number).count()
             if the_same_guest_in_seating_count != 0 and the_same_seat_in_seating_count != 0:
+                error_information.error_type = ErrorsEnum.SEATING_EXIST
                 return render_seating_view(request=request, status_type=StatusEnum.BEFORE_ADD,
-                                           error_information={'error_type': ErrorsEnum.SEATING_EXIST})
+                                           error_information=error_information)
 
             seating_form.save()
-            guest = int(guest)
+            guest = int(seating.guest)
             guest_object = Guests.objects.get(id=guest)
             return render_seating_view(request=request, status_type=StatusEnum.OK,
                                        guest_object=guest_object)
 
         else:
-            errors = seating_form.errors
+            error_information.error_list = seating_form.errors
+            error_information.error_type = ErrorsEnum.GUEST_ERROR
             return render_seating_view(request=request, status_type=StatusEnum.ERROR,
-                                       error_information={'error_type': ErrorsEnum.GUEST_ERROR,
-                                                          'errors': errors})
+                                       error_information=error_information)
     else:
         return render_seating_view(request=request, status_type=StatusEnum.BEFORE_ADD)
 
 
 def edit_seating(request, seating_id):
+    @dataclass
+    class EditionInformation:
+        guest_to_edit_id = None
+        table_name = None
+        seat_number = None
+
+    edition_information = EditionInformation()
+
     seating = Seating.objects.get(id=seating_id)
     seat = find_seat_assign_to_the_guest(seating)
-    table_name = find_table_name_assign_to_the_guest(seat)
-    guest_id = seating.guest_id
+    edition_information.seat_number = seat.number
+    edition_information.table_name = find_table_name_assign_to_the_guest(seat)
+    edition_information.guest_id = seating.guest_id
+
+    error_information = ErrorInformation()
 
     if request.method == 'POST':
         seating_to_edit = Seating.objects.get(id=seating_id)
@@ -239,22 +251,17 @@ def edit_seating(request, seating_id):
         if edit_seating_form.is_valid():
             edit_seating_form.save()
             return render_seating_view(request=request, status_type=StatusEnum.OK,
-                                       edition_information={'table_name': table_name,
-                                                            'seat_number': seat.seat_number,
-                                                            'guest_to_edit_id': guest_id})
+                                       edition_information=edition_information)
         else:
-            errors = edit_seating_form.errors
+            error_information.error_list = edit_seating_form.errors
+            error_information.error_type = ErrorsEnum.SEATING_ERROR
             return render_seating_view(request=request, status_type=StatusEnum.ERROR,
-                                       error_information={'errors': errors},
-                                       edition_information={'guest_to_edit_id': guest_id,
-                                                            'table_name': table_name,
-                                                            'seat_number': seat.seat_number})
+                                       error_information=error_information,
+                                       edition_information=edition_information)
 
     else:
         return render_seating_view(request=request, status_type=StatusEnum.BEFORE_ADD,
-                                   edition_information={'table_name': table_name,
-                                                        'seat_number': seat.seat_number,
-                                                        'guest_to_edit_id': guest_id})
+                                   edition_information=edition_information)
 
 
 def delete_seating(request, seating_id):

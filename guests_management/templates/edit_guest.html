@@ -30,12 +30,12 @@
                        value="{{ guestAge }}" min="0" max="100" required>
             </div>
 
-            {% if not afterAdd %}
+            {% if not status_type == StatusEnum.OK %}
             <button type="submit" class="btn btn-secondary">Edit</button>
             {% endif %}
         </form>
 
-        {% if afterAdd %}
+        {% if status_type == StatusEnum.OK %}
         <p class="confirmation_container container">
             Guest {{ addedGuestName }} {{ addedGuestSurname }} is correctly edited.
         </p>
@@ -43,12 +43,12 @@
                role="button" aria-pressed="true">Back to Guest list</a>
         {% endif %}
 
-        {% if guestExist %}
+        {% if error_type == ErrorsEnum.GUEST_EXIST %}
         <p class="confirmation_container container">
             Another guest called {{ guestName }} {{ guestSurname }} exists on the list!
             {% endif %}
 
-            {% if errorTable %}
+            {% if errorList %}
         <p class="confirmation_container container">
             {{ errorList }}
         </p>

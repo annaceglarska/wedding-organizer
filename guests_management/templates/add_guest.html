@@ -3,60 +3,65 @@
 {% block page_content %}
 <div class="d-flex justify-content-center">
     <div>
-<h1>Add new guest</h1>
-<form action="" method="POST">
-    {% csrf_token %}
-    <div class="form-group">
-        <label for="name_field">Name</label>
-        <input type="text" class="form-control" id="name_field" name="name" placeholder="Enter Name"
-               value="{{ guestName }}" required>
-    </div>
+        <h1>Add new guest</h1>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name_field">Name</label>
+                <input type="text" class="form-control" id="name_field" name="name"
+                       placeholder="Enter Name"
+                       value="{% if guestName and status_type != StatusEnum.OK %}{{ guestName }}{% endif %}"
+                       required>
+            </div>
 
-    <div class="form-group">
-        <label for="surname_field">Surname</label>
-        <input type="text" class="form-control" id="surname_field" name="surname" placeholder="Enter Surname"
-               value="{{ guestSurname }}" required>
-    </div>
+            <div class="form-group">
+                <label for="surname_field">Surname</label>
+                <input type="text" class="form-control" id="surname_field" name="surname"
+                       placeholder="Enter Surname"
+                       value="{% if guestSurname and status_type != StatusEnum.OK %}{{ guestSurname }}{% endif %}"
+                       required>
+            </div>
 
-    <div class="form-group">
-        <label for="phone_field">Phone</label>
-        <input type="text" class="form-control" id="phone_field" name="phone" placeholder="Enter phone"
-               value="{{ guestPhone }}" required>
-    </div>
+            <div class="form-group">
+                <label for="phone_field">Phone</label>
+                <input type="text" class="form-control" id="phone_field" name="phone"
+                       placeholder="Enter phone"
+                       value="{{ guestPhone }}" required>
+            </div>
 
-    <div class="form-group">
-        <label for="age_field">Age</label>
-        <input type="number" class="form-control" id="age_field" name="age" placeholder="Enter age"
-               value="{{ guestAge }}" min="0" max="100" required>
-    </div>
+            <div class="form-group">
+                <label for="age_field">Age</label>
+                <input type="number" class="form-control" id="age_field" name="age"
+                       placeholder="Enter age"
+                       value="{{ guestAge }}" min="0" max="100" required>
+            </div>
 
-    <button type="submit" class="btn btn-secondary">Add</button>
+            <button type="submit" class="btn btn-secondary">Add</button>
 
-    {% if afterAdd %}
-    <p class="confirmation_container container">
-        Guest {{ addedGuestName }} is correctly added to the guest list.
-    </p>
-    {% endif %}
+            {% if status_type == StatusEnum.OK %}
+            <p class="confirmation_container container">
+                Guest {{ guestName }} is correctly added to the guest list.
+            </p>
+            {% endif %}
 
-    {% if guestExist %}
-    <p class="error_container container">
-        Guest {{ guestName }} {{ guestSurname }} is already on the guest list!
-    </p>
-    {% endif %}
+            {% if error_type == ErrorsEnum.GUEST_EXIST %}
+            <p class="error_container container">
+                Guest {{ guestName }} {{ guestSurname }} is already on the guest list!
+            </p>
+            {% endif %}
 
-    {% if errorGuest %}
-    <div class="validation_error_container container">
-        {{ errorsList }}
-    </div>
-    {% endif %}
+            {% if errorList %}
+            <div class="validation_error_container container">
+                {{ errorList }}
+            </div>
+            {% endif %}
 
 
-</form>
+        </form>
     </div>
 </div>
 
 
-</style>
 <!--    {% load static %}-->
 <!--    <link rel="stylesheet" href="{% static 'css/add_guest.css' %}">-->
 {% endblock %}
