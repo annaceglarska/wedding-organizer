@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_content %}
+
+<h1> Table list </h1>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Number</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Number of seats</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for table in tables %}
+        <tr class="accordion-toggle collapsed"
+            id="accordion{{ table.id }}"
+            data-mdb-toggle="collapse"
+            data-mdb-parent="#accordion{{ table.id }}"
+            href="#collapse{{ table.id }}"
+            aria-controls="collapse{{ table.id }}"
+        >
+            <td>{{ table.id }}</td>
+            <td>{{ table.table_name }}</td>
+            <td>{{ table.description }}</td>
+            <td>{{ table.number_of_seats }}</td>
+            <td><a href="{% url 'one-table-form' table.pk %}" class="btn btn-primary btn-sm action-button"
+                   role="button" >Edit</a></td>
+            <td>
+                <button type="button" class="btn btn-danger btn-sm action-button"
+                        role="button"  data-type="delete"
+                        data-table-id="{{ table.id }}"
+                        data-table-name="{{ table.table_name }}">Delete
+                </button>
+            </td>
+        </tr>
+        <tr class="hide-table-padding">
+            <td colspan="6">
+                <div id="collapse{{ table.id }}" class="in p-3">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Seat number</th>
+                            <th>Guest name</th>
+                            <th>Guest surname</th>
+                            <th>Action on seating</th>
+                            <th>Delete seating</th>
+
+                        </tr>
+                        </thead>
+                        <tbody>
+
+
+                        {% for seat in table.seat_with_seating %}
+                        <tr>
+                            <td>{{ seat.seat_number }}</td>
+                            <td>{{ seat.guest.name }}</td>
+                            <td>{{ seat.guest.surname }}</td>
+                            {% if seat.seating_id %}
+                            <td>
+                                <a href="{% url 'edit-seating' seat.seating_id %}"
+                                   class="btn btn-primary btn-sm active"
+                                   role="button" aria-pressed="true">Edit</a>
+                            </td>
+                            <td>
+                            <a href="{% url 'delete-seating' seat.seating_id %}"
+                               class="btn btn-danger btn-sm active"
+                               role="button" aria-pressed="true">Delete</a>
+                            </td>
+                            {% else %}
+                            <td>
+                                <a href="{% url 'add-seating' %}"
+                                   class="btn btn-primary btn-sm active"
+                                   role="button" aria-pressed="true">Add seating</a>
+                            </td>
+                            <td></td>
+                            {% endif %}
+
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+
+        {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+{% include "delete.html" %}
+
+<!--Modal js-->
+<script src="{% static 'js/delete.js' %}"
+></script>
+
+<!--<script-->
+<!--        type="text/javascript"-->
+<!--        src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.4.1/mdb.min.js"-->
+<!--&gt;</script>-->
+
+
+<style>
+    tr.hide-table-padding td {
+  padding: 0;
+  }
+
+  .expand-button {
+    position: relative;
+  }
+
+  .accordion-toggle .expand-button:after
+  {
+    position: absolute;
+    left:.75rem;
+    top: 50%;
+    transform: translate(0, -50%);
+    content: '-';
+  }
+  .accordion-toggle.collapsed .expand-button:after
+  {
+    content: '+';
+  }
+
+
+
+</style>
+
+{% endblock %}

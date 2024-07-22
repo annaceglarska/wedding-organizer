@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_content %}
+<div class="d-flex justify-content-center">
+    <div>
+        {% if edition %}
+        <h1>Edit seating</h1>
+        <h3>{{ guest.name }} {{guest.surname }}: {{ table_name }} - seat {{ seat_number }}</h3>
+        <h5>Select new position or cancel.</h5>
+        {% else %}
+        <h1>Assign guest to the seat</h1>
+        {% endif %}
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+
+              <select class="custom-select" id="guest" name="guest" required>
+                    <option value="" disabled {% if edition == Null or edition == False %}
+                      selected {% endif %}>Select guest</option>
+                  {% for guest in guests %}
+                    <option value="{{guest.id}}" {% if edition %}
+                      selected {% endif %}>{{ guest.name }} {{ guest.surname }}</option>
+                  {% endfor %}
+              </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <select class="custom-select" id="table" name="table" required>
+                    <option value="" disabled selected>Select table</option>
+                  {% for table in tables %}
+                    <option value="{{table.id}}">{{ table.table_name }}</option>
+                  {% endfor %}
+              </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <select class="custom-select" id="seat" name="seat" required>
+                <option value="" disabled selected>Select seat</option>
+              </select>
+            </div>
+
+            {% if edition %}
+                {% if after_add %}
+                    <a href="{% url 'guest-list' %}" class="btn btn-secondary btn-lg active"
+                    role="button" aria-pressed="true">Back to Guest list</a>
+                {% else %}
+                    <button type="submit" class="btn btn-secondary">Edit</button>
+                {% endif %}
+            {% else %}
+                <button type="submit" class="btn btn-secondary">Add</button>
+            {% endif %}
+
+
+            {% if status_type == StatusEnum.OK %}
+                <p class="confirmation_container container">
+                Guest {{ guest.name }} {{ guest.surname }} was seated correctly.
+                </p>
+            {% endif %}
+
+            {% if error_type == ErrorsEnum.SEATING_EXIST %}
+
+                <p class="error_container container">
+                    Such seating is already on the list! {{error_type }}
+                </p>
+            {% endif %}
+
+            {% if error_type == ErrorsEnum.GUEST_ERROR %}
+            <div class="validation_error_container container">
+                Guest {{ guest }} was NOT seated correctly.
+                {{ error_list }}
+            </div>
+            {% endif %}
+
+        </form>
+    </div>
+</div>
+
+<!--Get_seats js-->
+    <script src="{% static 'js/get_seats.js' %}"
+            ></script>
+
+{% endblock %}
